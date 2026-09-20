@@ -14,6 +14,14 @@
     "dependencies": {
         "geode.node-ids": ">=v1.23.3"
     },
+    "links": {
+        "community": "https://discord.gg/z9pmtkHX9b",
+        "source": "https://github.com/ZhulinskiiDanil/FACEITify"
+    },
+    "issues": {
+        "info": "Free-form info about where and how to report issues. Supports markdown formatting",
+        "url": "https://github.com/ZhulinskiiDanil/FACEITify/issues"
+    },
     "resources": {
         "sprites": [
             "resources/faceitLevelTemplate.png",
