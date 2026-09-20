@@ -35,8 +35,6 @@ namespace faceit
         int getLevel() const;
         int getPlacement() const;
 
-        void setOpacity(GLubyte opacity) override;
-
     protected:
         bool init(int level, float size);
         bool rebuild();
