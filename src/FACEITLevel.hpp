@@ -5,7 +5,8 @@
 
 namespace faceit
 {
-    // Skill levels 1...10, 0 unrated
+    // Skill levels 1...10, 0 unrated, -1 auto
+    constexpr int AUTO_LEVEL = -1;
     constexpr int UNRATED_LEVEL = 0;
     constexpr int MIN_LEVEL = 1;
     constexpr int MAX_LEVEL = 10;
@@ -50,6 +51,7 @@ namespace faceit
         cocos2d::CCDrawNode *m_arc = nullptr;
         cocos2d::CCDrawNode *m_outline = nullptr;
         cocos2d::CCSprite *m_badge = nullptr;
+        cocos2d::CCSprite *m_invalid = nullptr;
         geode::Label *m_label = nullptr;
     };
 }

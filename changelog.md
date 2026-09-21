@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.1
+
+- The difficulty filters ring whichever toggle is on: the badges took GD's own
+  highlight with them. The demon type button follows the Demon toggle, and the
+  demon type picker rings the type you last chose.
+- Auto levels get a badge of their own instead of a number, with the ring
+  sitting at the far end in blue. Levels GD hasn't rated keep their question
+  mark.
+- The Auto filter kept the vanilla face where everything else was a badge. It
+  gets one too.
+
 ## v1.0.0
 
 First release.

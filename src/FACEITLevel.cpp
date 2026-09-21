@@ -13,7 +13,6 @@ namespace
 
     constexpr float ARC_INNER_RATIO = 77.f / 256.f;
     constexpr float ARC_OUTER_RATIO = 103.f / 256.f;
-    constexpr float OUTLINE_INNER_RATIO = 104.f / 256.f;
     constexpr float OUTLINE_OUTER_RATIO = 127.f / 256.f;
 
     constexpr float ARC_BLOCKED_DEGREES = .225f * 360.f;
@@ -21,8 +20,10 @@ namespace
     constexpr float ARC_SWEEP_DEGREES = 360.f - ARC_BLOCKED_DEGREES;
     constexpr float ARC_STEP_DEGREES = 3.f;
 
+    constexpr float AUTO_ARC_RATIO = .6f;
+
     constexpr cocos2d::ccColor3B ARC_TRACK_COLOR = {49, 49, 52};
-    constexpr cocos2d::ccColor3B OUTLINE_COLOR = {255, 255, 255};
+    constexpr cocos2d::ccColor3B AUTO_COLOR = {86, 125, 255};
     constexpr cocos2d::ccColor3B CHALLENGER_TEXT_COLOR = {255, 255, 255};
 
     cocos2d::CCPoint pointOnArc(float radius, float degrees)
@@ -61,6 +62,8 @@ namespace
     // 1 white, 2-3 green, 4-7 yellow, 8-9 orange, 10 red
     cocos2d::ccColor3B colorForLevel(int level)
     {
+        if (level == faceit::AUTO_LEVEL)
+            return AUTO_COLOR;
         if (level >= 10)
             return {254, 31, 0};
         if (level >= 8)
@@ -84,7 +87,7 @@ namespace faceit
         switch (difficulty)
         {
         case GJDifficulty::Auto:
-            return 1;
+            return AUTO_LEVEL;
         case GJDifficulty::Easy:
             return 1;
         case GJDifficulty::Normal:
@@ -106,6 +109,7 @@ namespace faceit
             return 9;
         case GJDifficulty::DemonExtreme:
             return 10;
+        // NA
         default:
             return UNRATED_LEVEL;
         }
@@ -122,9 +126,39 @@ namespace faceit
         return std::min(size.width, size.height);
     }
 
+    // -1 auto, 0 unrated, 1-5 easy...insane, 6 hard demon, 7 easy, 8 medium,
+    // 9 insane, 10 extreme
     int levelFromDifficulty(int difficulty)
     {
-        return levelFromDifficulty(static_cast<GJDifficulty>(difficulty));
+        switch (difficulty)
+        {
+        case -1:
+            return AUTO_LEVEL;
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+            return 3;
+        case 4:
+            return 4;
+        case 5:
+            return 5;
+        // A plain demon is a hard demon.
+        case 6:
+            return 8;
+        case 7:
+            return 6;
+        case 8:
+            return 7;
+        case 9:
+            return 9;
+        case 10:
+            return 10;
+        // 0, and anything GD grows later
+        default:
+            return UNRATED_LEVEL;
+        }
     }
 
     FACEITLevel *FACEITLevel::create(int level, float size)
@@ -158,7 +192,7 @@ namespace faceit
 
     bool FACEITLevel::loadFromLevel(int level)
     {
-        m_difficultyLevel = std::clamp(level, UNRATED_LEVEL, MAX_LEVEL);
+        m_difficultyLevel = level == AUTO_LEVEL ? AUTO_LEVEL : std::clamp(level, UNRATED_LEVEL, MAX_LEVEL);
 
         return this->rebuild();
     }
@@ -220,6 +254,21 @@ namespace faceit
             this->addChild(m_outline, 3);
         }
 
+        auto const isAuto = m_level == AUTO_LEVEL;
+        if (isAuto && !m_invalid)
+        {
+            m_invalid = CCSprite::create("faceitInvalid.png"_spr);
+            if (m_invalid)
+            {
+                m_invalid->setAnchorPoint({.5f, .5f});
+                m_invalid->setPosition(center);
+                m_invalid->setScale(size.width / m_invalid->getContentSize().width);
+                this->addChild(m_invalid, 2);
+            }
+        }
+        if (m_invalid)
+            m_invalid->setVisible(isAuto);
+
         if (!m_label)
         {
             m_label = Label::create("", "gjFont17.fnt");
@@ -228,6 +277,8 @@ namespace faceit
             this->addChild(m_label, 2);
         }
 
+        m_label->setVisible(!isAuto);
+
         if (challenger)
             m_label->setText(std::to_string(m_placement));
         else
@@ -235,7 +286,9 @@ namespace faceit
 
         m_label->setColor(challenger ? CHALLENGER_TEXT_COLOR : colorForLevel(m_level));
         m_label->setLimitLabelSize(
-            {size.width * INNER_DISC_RATIO, size.height * INNER_DISC_RATIO}, 0.5f, .1f);
+            {size.width * ARC_OUTER_RATIO,
+             size.height * ARC_OUTER_RATIO},
+            1.f, .1f);
 
         // // TODO: too clever by half, reaching both of those through setOpacity
         // this->setOpacity(this->getOpacity());
@@ -268,6 +321,15 @@ namespace faceit
             ARC_SWEEP_DEGREES,
             ARC_TRACK_COLOR,
             opacity);
+        if (m_level == AUTO_LEVEL)
+        {
+            drawArc(
+                m_arc, innerRadius, outerRadius,
+                ARC_START_DEGREES + ARC_SWEEP_DEGREES * (1.f - AUTO_ARC_RATIO),
+                ARC_SWEEP_DEGREES * AUTO_ARC_RATIO, colorForLevel(m_level), opacity);
+            return;
+        }
+
         drawArc(
             m_arc, innerRadius, outerRadius, ARC_START_DEGREES,
             ARC_SWEEP_DEGREES * static_cast<float>(m_level) / static_cast<float>(MAX_LEVEL),
@@ -302,8 +364,13 @@ namespace faceit
             return;
 
         drawArc(
-            m_outline, size.width * OUTLINE_INNER_RATIO, size.width * OUTLINE_OUTER_RATIO,
-            0.f, 360.f, OUTLINE_COLOR, this->getDisplayedOpacity());
+            m_outline,
+            size.width * OUTLINE_OUTER_RATIO,
+            size.width * OUTLINE_OUTER_RATIO + size.width * 0.02f,
+            0.f,
+            360.f,
+            colorForLevel(m_level),
+            this->getDisplayedOpacity());
     }
 
     int FACEITLevel::getLevel() const

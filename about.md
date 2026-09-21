@@ -14,6 +14,9 @@ rated show a **?**.
 The ring around the badge fills up with the level, the way it does on a real
 FACEIT profile, and the number takes the colour of its tier.
 
+Auto levels have no skill to measure, so instead of a number they get a badge of
+their own, with the ring sitting at the far end in blue.
+
 ## Challenger
 
 Levels in the **top 100 of the classic demon list** get the Challenger badge

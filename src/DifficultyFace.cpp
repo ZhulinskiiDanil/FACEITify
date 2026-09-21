@@ -1,5 +1,6 @@
 #include "DifficultyFace.hpp"
 
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -16,7 +17,7 @@ namespace
             std::vector<std::pair<CCRect, int>> result;
             auto cache = CCSpriteFrameCache::sharedSpriteFrameCache();
 
-            for (int difficulty = 0; difficulty <= faceit::MAX_LEVEL; ++difficulty)
+            for (int difficulty = faceit::AUTO_LEVEL; difficulty <= faceit::MAX_LEVEL; ++difficulty)
                 for (auto name : {GJDifficultyName::Short, GJDifficultyName::Long})
                 {
                     auto const frameName = GJDifficultySprite::getDifficultyFrame(difficulty, name);
@@ -30,6 +31,8 @@ namespace
         return frames;
     }
 
+    constexpr int NO_DIFFICULTY = std::numeric_limits<int>::min();
+
     int difficultyOfSprite(CCSprite *sprite)
     {
         auto const rect = sprite->getTextureRect();
@@ -37,13 +40,13 @@ namespace
             if (frameRect.equals(rect))
                 return difficulty;
 
-        return -1;
+        return NO_DIFFICULTY;
     }
 
     CCSprite *findDifficultySprite(CCNode *node)
     {
         if (auto sprite = typeinfo_cast<CCSprite *>(node))
-            if (difficultyOfSprite(sprite) >= 0 || sprite->getChildByID("level"_spr))
+            if (difficultyOfSprite(sprite) != NO_DIFFICULTY || sprite->getChildByID("level"_spr))
                 return sprite;
 
         auto children = node->getChildren();
@@ -86,13 +89,13 @@ namespace faceit
             badge->setID("level"_spr);
             sprite->addChild(badge);
         }
-        else if (difficulty >= 0)
+        else if (difficulty != NO_DIFFICULTY)
         {
             badge->loadFromLevel(levelFromDifficulty(difficulty));
         }
 
         // TODO: setTag is a poor home for this. Give FACEITLevel a real field
-        if (difficulty >= 0)
+        if (difficulty != NO_DIFFICULTY)
             badge->setTag(difficulty);
 
         if (isSelected)

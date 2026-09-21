@@ -6,6 +6,19 @@
 using namespace geode::prelude;
 using namespace faceit;
 
+namespace
+{
+    bool isDemonTag(int tag)
+    {
+        return tag == 0 || (tag >= 6 && tag <= 10);
+    }
+
+    int demonTagOf(CCNode *node)
+    {
+        return node && isDemonTag(node->getTag()) ? node->getTag() : -1;
+    }
+}
+
 class $modify(FACEITDemonFilterSelectLayer, DemonFilterSelectLayer)
 {
     bool init()
@@ -27,7 +40,17 @@ class $modify(FACEITDemonFilterSelectLayer, DemonFilterSelectLayer)
     void replaceDemonFaces()
     {
         auto demons = m_demons;
+
         for (unsigned int i = 0; demons && i < demons->count(); ++i)
-            replaceDifficultyFace(typeinfo_cast<CCNode *>(demons->objectAtIndex(i)));
+        {
+            auto node = typeinfo_cast<CCNode *>(demons->objectAtIndex(i));
+            if (!node)
+                continue;
+
+            auto const tag = demonTagOf(node);
+
+            replaceDifficultyFace(node, [this, tag](int)
+                                  { return tag >= 0 && tag == m_currentDemon; });
+        }
     }
 };

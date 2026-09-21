@@ -2,9 +2,17 @@
 #include <Geode/modify/LevelSearchLayer.hpp>
 
 #include "../DifficultyFace.hpp"
+#include "../FACEITLevel.hpp"
 
 using namespace geode::prelude;
 using namespace faceit;
+
+namespace
+{
+    // The toggles are numbered the way the faces are, 0 NA through 6 demon,
+    // with auto filed last instead of at the -1 its face answers to
+    constexpr int AUTO_FILTER = 7;
+}
 
 class $modify(FACEITSearchLayer, LevelSearchLayer)
 {
@@ -34,16 +42,20 @@ class $modify(FACEITSearchLayer, LevelSearchLayer)
 
     void replaceDifficultyFilters()
     {
-        // TODO: assumes checkDiff is keyed the same way as getDifficultyFrame.
         auto const isSelected = [this](int difficulty)
         {
-            return this->checkDiff(difficulty);
+            return this->checkDiff(difficulty == AUTO_LEVEL ? AUTO_FILTER : difficulty);
         };
 
         auto filters = m_difficultySprites;
         for (unsigned int i = 0; filters && i < filters->count(); ++i)
             replaceDifficultyFace(typeinfo_cast<CCNode *>(filters->objectAtIndex(i)), isSelected);
 
-        replaceDifficultyFace(m_lastDifficultySprite, isSelected);
+        replaceDifficultyFace(
+            m_lastDifficultySprite,
+            [this](int)
+            {
+                return this->checkDiff(static_cast<int>(GJDifficulty::Demon));
+            });
     }
 };
