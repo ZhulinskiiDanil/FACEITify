@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.1.0
+
+- RobTop's own levels get badges too. The main level select draws its face by
+  hand rather than through the class every other face goes through, so it kept
+  the vanilla one ([#1](https://github.com/ZhulinskiiDanil/FACEITify/issues/1)).
+- The badge ring fills up to the level when a level page opens. A Challenger
+  that the list confirms late fills it again. There is a setting for people who
+  would rather it sat still.
+- Placements can come from **Pointercrate** or **AREDL** instead of
+  demonlist.org, and **Off** stops the mod asking anyone. Each list keeps its
+  own cache.
+- **More Difficulties** is marked incompatible. Both mods want the same faces,
+  and its tiers have no skill level to turn into.
+
 ## v1.0.1
 
 - The difficulty filters ring whichever toggle is on: the badges took GD's own

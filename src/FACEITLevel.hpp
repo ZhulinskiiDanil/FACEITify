@@ -33,6 +33,8 @@ namespace faceit
         void setSelected(bool selected);
         bool isSelected() const;
 
+        void playIntro();
+
         int getLevel() const;
         int getPlacement() const;
 
@@ -41,12 +43,18 @@ namespace faceit
         bool rebuild();
         void updateArc();
         void updateOutline();
+        void stepIntro(float dt);
 
         int m_difficultyLevel = UNRATED_LEVEL; // what GD says
         int m_placement = 0;                   // what the demon list says
         int m_level = UNRATED_LEVEL;           // what the two come out as
         int m_levelID = 0;
         bool m_selected = false;
+
+        float m_arcProgress = 1.f;
+        float m_introTime = 0.f;
+        bool m_introPlaying = false;
+
         std::string m_template;
         cocos2d::CCDrawNode *m_arc = nullptr;
         cocos2d::CCDrawNode *m_outline = nullptr;

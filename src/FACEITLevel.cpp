@@ -22,6 +22,9 @@ namespace
 
     constexpr float AUTO_ARC_RATIO = .6f;
 
+    constexpr float INTRO_ARC_DELAY = .25f;
+    constexpr float INTRO_ARC_DURATION = .75f;
+
     constexpr cocos2d::ccColor3B ARC_TRACK_COLOR = {49, 49, 52};
     constexpr cocos2d::ccColor3B AUTO_COLOR = {86, 125, 255};
     constexpr cocos2d::ccColor3B CHALLENGER_TEXT_COLOR = {255, 255, 255};
@@ -57,6 +60,17 @@ namespace
             };
             node->drawPolygon(quad, 4, fill, 0.f, fill);
         }
+    }
+
+    bool animationsOn()
+    {
+        return geode::Mod::get()->getSettingValue<bool>("animate");
+    }
+
+    float easeOutCubic(float t)
+    {
+        auto const left = 1.f - t;
+        return 1.f - left * left * left;
     }
 
     // 1 white, 2-3 green, 4-7 yellow, 8-9 orange, 10 red
@@ -290,9 +304,6 @@ namespace faceit
              size.height * ARC_OUTER_RATIO},
             1.f, .1f);
 
-        // // TODO: too clever by half, reaching both of those through setOpacity
-        // this->setOpacity(this->getOpacity());
-
         this->updateArc();
         this->updateOutline();
 
@@ -326,14 +337,47 @@ namespace faceit
             drawArc(
                 m_arc, innerRadius, outerRadius,
                 ARC_START_DEGREES + ARC_SWEEP_DEGREES * (1.f - AUTO_ARC_RATIO),
-                ARC_SWEEP_DEGREES * AUTO_ARC_RATIO, colorForLevel(m_level), opacity);
+                ARC_SWEEP_DEGREES * AUTO_ARC_RATIO * m_arcProgress, colorForLevel(m_level), opacity);
             return;
         }
 
         drawArc(
             m_arc, innerRadius, outerRadius, ARC_START_DEGREES,
-            ARC_SWEEP_DEGREES * static_cast<float>(m_level) / static_cast<float>(MAX_LEVEL),
+            ARC_SWEEP_DEGREES * static_cast<float>(m_level) / static_cast<float>(MAX_LEVEL) * m_arcProgress,
             colorForLevel(m_level), opacity);
+    }
+
+    void FACEITLevel::playIntro()
+    {
+        if (!animationsOn())
+            return;
+
+        if (!m_introPlaying)
+        {
+            m_introPlaying = true;
+            this->schedule(schedule_selector(FACEITLevel::stepIntro));
+        }
+
+        m_introTime = 0.f;
+        m_arcProgress = 0.f;
+        this->updateArc();
+    }
+
+    void FACEITLevel::stepIntro(float dt)
+    {
+        m_introTime += dt;
+
+        auto const played = std::clamp(
+            (m_introTime - INTRO_ARC_DELAY) / INTRO_ARC_DURATION, 0.f, 1.f);
+
+        m_arcProgress = easeOutCubic(played);
+        this->updateArc();
+
+        if (played < 1.f)
+            return;
+
+        m_introPlaying = false;
+        this->unschedule(schedule_selector(FACEITLevel::stepIntro));
     }
 
     void FACEITLevel::setSelected(bool selected)

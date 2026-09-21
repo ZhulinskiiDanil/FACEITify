@@ -1,37 +1,40 @@
 # FACEITify
 
-Replaces the difficulty faces with FACEIT skill level badges.
+Every difficulty face turns into a **FACEIT skill level badge**: level cells,
+level pages, search results, profiles, leaderboards, the search filters and
+RobTop's own levels.
 
-Every face in the game turns into a badge: level cells, the level page, search
-results, profiles, leaderboards, and the difficulty filters in the search menu.
+## The badge
 
-## How difficulties map
+- <c-EEEEEE>**1**</c> — Easy
+- <c-1CE400>**2-3**</c> — Normal, Hard
+- <c-FFC800>**4-7**</c> — Harder, Insane, Easy and Medium Demon
+- <c-FF6309>**8-9**</c> — Hard and Insane Demon, a plain Demon among them
+- <c-FE1F00>**10**</c> — Extreme Demon
+- <c-9A9A9A>**?**</c> — GD hasn't rated it
+- <c-567DFF>**Auto**</c> — no skill to measure, so a badge of its own
 
-Easy through Insane become levels **1 to 5**, Easy Demon through Extreme Demon
-become **6 to 10**, and a plain Demon counts as a hard one. Levels GD hasn't
-rated show a **?**.
-
-The ring around the badge fills up with the level, the way it does on a real
-FACEIT profile, and the number takes the colour of its tier.
-
-Auto levels have no skill to measure, so instead of a number they get a badge of
-their own, with the ring sitting at the far end in blue.
+The ring fills up with the level and the number takes its tier colour, the way
+it does on a real FACEIT profile. Opening a level page fills the ring in.
 
 ## Challenger
 
-Levels in the **top 100 of the classic demon list** get the Challenger badge
-instead, with their place on the list inside it.
+The **top 100 of a demon list** get the Challenger badge with their place in it.
+Anything else on the list counts as a <c-FE1F00>**10**</c>, which settles the
+demons GD never got round to rating.
 
-The list also settles the demons GD never got round to rating: if a level is on
-it at all, it counts as a 10 rather than a **?**.
+## Lists
 
-Placements come from [demonlist.org](https://demonlist.org). The whole list is
-fetched once and kept for an hour, so browsing levels costs no requests. With no
-connection the mod falls back to the difficulties GD itself reports, and nothing
-breaks.
+- **demonlist.org** — the classic list, the default
+- **Pointercrate** — the main list, the extended one, the first of the legacy
+- **AREDL** — every rated extreme demon, close to sixteen hundred of them
+- **Off** — no requests at all
+
+Each keeps its own cache for an hour, so browsing costs nothing. With no
+connection the badges are whatever GD says, and nothing breaks.
 
 ## Credits
 
-Thanks to **xboctatuk** and [Global List
-Integration](https://github.com/XBOCTATUK/Global-List-Integration) for working
-out the demon list API first.
+**xboctatuk** and [Global List
+Integration](https://github.com/XBOCTATUK/Global-List-Integration) worked the
+demon list API out first.

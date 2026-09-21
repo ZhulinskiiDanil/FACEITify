@@ -94,7 +94,6 @@ namespace faceit
             badge->loadFromLevel(levelFromDifficulty(difficulty));
         }
 
-        // TODO: setTag is a poor home for this. Give FACEITLevel a real field
         if (difficulty != NO_DIFFICULTY)
             badge->setTag(difficulty);
 
