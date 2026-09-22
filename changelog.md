@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.1
+
+- The bottom of the list grades as a **10** again. The ladder from the
+  Challenger cut down was laid out over **11** to **20**, so the very last
+  place still came out an **11**; it now spans **10** to **20**.
+- A level anywhere on the list is never graded below a **10**, whatever GD
+  rated it.
+
 ## v1.2.0
 
 - Demons on the list below the top 100 are graded from **11** to **20** by where

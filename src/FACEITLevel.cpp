@@ -155,8 +155,8 @@ namespace faceit
         if (placement <= demonlist::CHALLENGER_PLACES)
             return MAX_LEVEL;
 
-        auto const first = MAX_DIFFICULTY_LEVEL + 1;
-        auto const grades = MAX_LEVEL - MAX_DIFFICULTY_LEVEL;
+        auto const first = MAX_DIFFICULTY_LEVEL;
+        auto const grades = MAX_LEVEL - MAX_DIFFICULTY_LEVEL + 1;
 
         auto const cut = static_cast<float>(demonlist::CHALLENGER_PLACES);
         auto const tail = std::max(static_cast<float>(demonlist::listSize()), cut * 2.f);
@@ -269,7 +269,9 @@ namespace faceit
 
     bool FACEITLevel::rebuild()
     {
-        m_level = m_placement > 0 ? levelFromPlacement(m_placement) : m_difficultyLevel;
+        m_level = m_placement > 0
+                      ? std::max(levelFromPlacement(m_placement), MAX_DIFFICULTY_LEVEL)
+                      : m_difficultyLevel;
         auto const challenger = m_placement > 0 && m_placement <= demonlist::CHALLENGER_PLACES;
 
         auto const size = this->getContentSize();

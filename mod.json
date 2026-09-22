@@ -8,7 +8,7 @@
     },
     "id": "zhulis.faceitify",
     "name": "FACEITify",
-    "version": "v1.2.0",
+    "version": "v1.2.1",
     "developer": "Zhulis",
     "description": "FACEIT-style difficulty badges",
     "settings": {
