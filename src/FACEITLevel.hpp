@@ -5,16 +5,17 @@
 
 namespace faceit
 {
-    // Skill levels 1...10, 0 unrated, -1 auto
     constexpr int AUTO_LEVEL = -1;
     constexpr int UNRATED_LEVEL = 0;
     constexpr int MIN_LEVEL = 1;
-    constexpr int MAX_LEVEL = 10;
+    constexpr int MAX_DIFFICULTY_LEVEL = 10;
+    constexpr int MAX_LEVEL = 20;
 
     float iconSize(GJDifficultyName name = GJDifficultyName::Short);
 
     int levelFromDifficulty(GJDifficulty difficulty);
     int levelFromDifficulty(int difficulty);
+    int levelFromPlacement(int placement);
 
     class FACEITLevel : public cocos2d::CCNodeRGBA
     {

@@ -17,7 +17,7 @@ namespace
             std::vector<std::pair<CCRect, int>> result;
             auto cache = CCSpriteFrameCache::sharedSpriteFrameCache();
 
-            for (int difficulty = faceit::AUTO_LEVEL; difficulty <= faceit::MAX_LEVEL; ++difficulty)
+            for (int difficulty = faceit::AUTO_LEVEL; difficulty <= faceit::MAX_DIFFICULTY_LEVEL; ++difficulty)
                 for (auto name : {GJDifficultyName::Short, GJDifficultyName::Long})
                 {
                     auto const frameName = GJDifficultySprite::getDifficultyFrame(difficulty, name);

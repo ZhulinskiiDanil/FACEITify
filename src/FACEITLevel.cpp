@@ -3,6 +3,7 @@
 #include "DemonList.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 using namespace geode::prelude;
@@ -28,6 +29,22 @@ namespace
     constexpr cocos2d::ccColor3B ARC_TRACK_COLOR = {49, 49, 52};
     constexpr cocos2d::ccColor3B AUTO_COLOR = {86, 125, 255};
     constexpr cocos2d::ccColor3B CHALLENGER_TEXT_COLOR = {255, 255, 255};
+    constexpr cocos2d::ccColor3B CHALLENGER_COLOR = {255, 197, 61};
+
+    constexpr std::array<cocos2d::ccColor3B, faceit::MAX_LEVEL - faceit::MAX_DIFFICULTY_LEVEL> LIST_COLORS = {{
+        {254, 1, 35},    // 11
+        {253, 3, 70},    // 12
+        {254, 3, 121},   // 13
+        {255, 1, 155},   // 14
+        {204, 41, 200},  // 15
+        {70, 147, 236},  // 16
+        {31, 178, 247},  // 17
+        {0, 203, 255},   // 18
+        {76, 219, 255},  // 19
+        {255, 255, 255}, // 20
+    }};
+
+    constexpr float LIST_CURVE = 1.5f;
 
     cocos2d::CCPoint pointOnArc(float radius, float degrees)
     {
@@ -73,11 +90,13 @@ namespace
         return 1.f - left * left * left;
     }
 
-    // 1 white, 2-3 green, 4-7 yellow, 8-9 orange, 10 red
+    // 1 white, 2-3 green, 4-7 yellow, 8-9 orange, 10 red, 11-20 the list's own
     cocos2d::ccColor3B colorForLevel(int level)
     {
         if (level == faceit::AUTO_LEVEL)
             return AUTO_COLOR;
+        if (level > faceit::MAX_DIFFICULTY_LEVEL)
+            return LIST_COLORS[std::min(level, faceit::MAX_LEVEL) - faceit::MAX_DIFFICULTY_LEVEL - 1];
         if (level >= 10)
             return {254, 31, 0};
         if (level >= 8)
@@ -127,6 +146,27 @@ namespace faceit
         default:
             return UNRATED_LEVEL;
         }
+    }
+
+    int levelFromPlacement(int placement)
+    {
+        if (placement <= 0)
+            return UNRATED_LEVEL;
+        if (placement <= demonlist::CHALLENGER_PLACES)
+            return MAX_LEVEL;
+
+        auto const first = MAX_DIFFICULTY_LEVEL + 1;
+        auto const grades = MAX_LEVEL - MAX_DIFFICULTY_LEVEL;
+
+        auto const cut = static_cast<float>(demonlist::CHALLENGER_PLACES);
+        auto const tail = std::max(static_cast<float>(demonlist::listSize()), cut * 2.f);
+        auto const place = std::min(static_cast<float>(placement), tail);
+
+        auto const climbed = std::clamp(std::log(place / cut) / std::log(tail / cut), 0.f, 1.f);
+        auto const eased = std::pow(climbed, 1.f / LIST_CURVE);
+        auto const step = std::max(static_cast<int>(std::ceil(eased * static_cast<float>(grades))), 1);
+
+        return std::clamp(MAX_LEVEL + 1 - step, first, MAX_LEVEL);
     }
 
     float iconSize(GJDifficultyName name)
@@ -229,7 +269,7 @@ namespace faceit
 
     bool FACEITLevel::rebuild()
     {
-        m_level = m_placement > 0 ? MAX_LEVEL : m_difficultyLevel;
+        m_level = m_placement > 0 ? levelFromPlacement(m_placement) : m_difficultyLevel;
         auto const challenger = m_placement > 0 && m_placement <= demonlist::CHALLENGER_PLACES;
 
         auto const size = this->getContentSize();
@@ -341,9 +381,11 @@ namespace faceit
             return;
         }
 
+        auto const filled = std::min(m_level, MAX_DIFFICULTY_LEVEL);
+
         drawArc(
             m_arc, innerRadius, outerRadius, ARC_START_DEGREES,
-            ARC_SWEEP_DEGREES * static_cast<float>(m_level) / static_cast<float>(MAX_LEVEL) * m_arcProgress,
+            ARC_SWEEP_DEGREES * static_cast<float>(filled) / static_cast<float>(MAX_DIFFICULTY_LEVEL) * m_arcProgress,
             colorForLevel(m_level), opacity);
     }
 
@@ -407,13 +449,15 @@ namespace faceit
         if (!m_selected)
             return;
 
+        auto const challenger = m_placement > 0 && m_placement <= demonlist::CHALLENGER_PLACES;
+
         drawArc(
             m_outline,
             size.width * OUTLINE_OUTER_RATIO,
             size.width * OUTLINE_OUTER_RATIO + size.width * 0.02f,
             0.f,
             360.f,
-            colorForLevel(m_level),
+            challenger ? CHALLENGER_COLOR : colorForLevel(m_level),
             this->getDisplayedOpacity());
     }
 

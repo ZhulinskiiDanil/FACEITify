@@ -8,13 +8,13 @@
     },
     "id": "zhulis.faceitify",
     "name": "FACEITify",
-    "version": "v1.1.0",
+    "version": "v1.2.0",
     "developer": "Zhulis",
     "description": "FACEIT-style difficulty badges",
     "settings": {
         "list": {
             "name": "Demon list",
-            "description": "Which list hands out the <cg>Challenger</c> badges and rates the demons GD never got round to. <cy>demonlist.org</c> and <cy>Pointercrate</c> are the classic top; <cy>AREDL</c> covers every rated extreme.",
+            "description": "Which list hands out the <cg>Challenger</c> badges and grades everything under them from <cr>11</c> to <cl>20</c>. <cy>demonlist.org</c> and <cy>Pointercrate</c> are the classic top; <cy>AREDL</c> covers every rated extreme.",
             "type": "string",
             "default": "demonlist.org",
             "one-of": [

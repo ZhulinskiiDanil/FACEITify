@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.0
+
+- Demons on the list below the top 100 are graded from **11** to **20** by where
+  they sit in it, instead of all counting as a **10**. The bands follow the list:
+  they are hundreds of places wide down the tail and a dozen wide near the
+  Challenger cut, because that is where the difficulty actually jumps.
+- The ring is full from **10** up, so the new levels read off the number and
+  FACEIT's own colour for it: red into magenta, then the blues, then white at
+  **20**. Challenger's ring is gold.
+- **Pointercrate** is read to the end of the legacy list rather than the first
+  two hundred places, so the lower grades have something to sit on.
+
 ## v1.1.0
 
 - RobTop's own levels get badges too. The main level select draws its face by

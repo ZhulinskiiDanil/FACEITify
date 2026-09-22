@@ -3,6 +3,7 @@
 #include <Geode/utils/file.hpp>
 #include <Geode/utils/web.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <map>
 #include <memory>
@@ -29,7 +30,8 @@ namespace
 
     constexpr char const *POINTERCRATE_LIST_URL = "https://pointercrate.com/api/v2/demons/listed/";
     constexpr int POINTERCRATE_PAGE_SIZE = 100;
-    constexpr int POINTERCRATE_PAGES = 2;
+    // Enough to reach the end of the legacy list, and it stops at a short page
+    constexpr int POINTERCRATE_PAGES = 8;
 
     constexpr char const *AREDL_LIST_URL = "https://api.aredl.net/v2/api/aredl/levels";
     constexpr char const *AREDL_LEVEL_URL = "https://api.aredl.net/v2/api/aredl/levels/";
@@ -39,6 +41,7 @@ namespace
     struct Cache
     {
         Placements placements;
+        int size = 0;
 
         bool complete = false;
         std::unordered_map<int, std::vector<std::function<void(int)>>> pending;
@@ -75,6 +78,30 @@ namespace
             return Source::Off;
 
         return Source::DemonListOrg;
+    }
+
+    int defaultListSize(Source source)
+    {
+        switch (source)
+        {
+        case Source::Pointercrate:
+            return 700;
+        case Source::AREDL:
+            return 1600;
+        case Source::DemonListOrg:
+            return 1800;
+        default:
+            return 0;
+        }
+    }
+
+    int longestPlacement(Placements const &placements)
+    {
+        int longest = 0;
+        for (auto const &[id, placement] : placements)
+            longest = std::max(longest, placement);
+
+        return longest;
     }
 
     Source &currentSource()
@@ -126,6 +153,9 @@ namespace
         if (seconds > 0)
             c.fetched = std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
 
+        if (root.contains("size"))
+            c.size = static_cast<int>(root["size"].asInt().unwrapOr(0));
+
         for (auto &entry : root["levels"])
         {
             auto const key = entry.getKey();
@@ -140,6 +170,10 @@ namespace
                 c.complete = true;
             }
         }
+
+        // A cache file written before the length was kept
+        if (c.size <= 0)
+            c.size = longestPlacement(c.placements);
     }
 
     void writeCacheFile(Source source)
@@ -155,6 +189,7 @@ namespace
 
         auto root = matjson::Value::object();
         root.set("fetched", std::chrono::duration_cast<std::chrono::seconds>(c.fetched.time_since_epoch()).count());
+        root.set("size", c.size);
         root.set("levels", levels);
 
         (void)file::writeString(cachePath(source), root.dump(matjson::NO_INDENTATION));
@@ -227,6 +262,7 @@ namespace
         auto &c = cache(source);
 
         c.placements = std::move(placements);
+        c.size = longestPlacement(c.placements);
         c.complete = true;
         c.fetched = now();
 
@@ -449,6 +485,19 @@ namespace faceit::demonlist
     Source source()
     {
         return currentSource();
+    }
+
+    int listSize()
+    {
+        auto const source = currentSource();
+        if (source == Source::Off)
+            return 0;
+
+        ensureFresh(source);
+
+        auto const &c = cache(source);
+
+        return c.size > 0 ? c.size : defaultListSize(source);
     }
 
     int placementOf(int levelID)

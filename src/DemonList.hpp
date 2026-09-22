@@ -20,6 +20,8 @@ namespace faceit
 
         Source source();
 
+        int listSize();
+
         int placementOf(int levelID);
 
         // Asks about one level and remembers the answer
